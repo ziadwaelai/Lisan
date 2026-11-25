@@ -54,7 +54,7 @@ namespace Lisan
                 Multiline = true, BorderStyle = BorderStyle.FixedSingle, Font = Ui.Font(11f),
                 BackColor = Color.FromArgb(248, 249, 250), ForeColor = Ui.Text, AcceptsReturn = false,
             };
-            input.TextChanged += delegate { input.RightToLeft = Gemini.LooksArabic(input.Text) ? RightToLeft.Yes : RightToLeft.No; Relayout(); };
+            input.TextChanged += delegate { input.RightToLeft = Gemini.IsRtl(null, input.Text) ? RightToLeft.Yes : RightToLeft.No; Relayout(); };
             input.KeyDown += InputKeyDown;
 
             output = new TextBox
@@ -176,7 +176,7 @@ namespace Lisan
             {
                 result = res;
                 output.ForeColor = Ui.Text;
-                output.RightToLeft = Gemini.LooksArabic(res) ? RightToLeft.Yes : RightToLeft.No;
+                output.RightToLeft = Gemini.IsRtl(lastSource, res) ? RightToLeft.Yes : RightToLeft.No;
                 output.Text = res.Replace("\r\n", "\n").Replace("\n", "\r\n");
                 output.Select(0, 0);
                 SetButtons(inputMode, true, !inputMode && target != IntPtr.Zero, false);

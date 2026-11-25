@@ -25,15 +25,44 @@ namespace Lisan
                    "Common work and tech words (deployment, ticket, meeting, QA, bug) can stay in English as Egyptians say them";
         }
 
+        static bool IsArabicChar(char c) { return c >= '؀' && c <= 'ۿ'; }
+        static bool IsLatinChar(char c) { return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z'); }
+
+        public static bool HasArabic(string text)
+        {
+            foreach (char c in text) if (IsArabicChar(c)) return true;
+            return false;
+        }
+
+        /// True when most *words* are Arabic. Counting words (not letters) keeps an Arabic sentence
+        /// full of English tech terms ("README", "passphrase") classified as Arabic.
         public static bool LooksArabic(string text)
         {
-            int ar = 0, latin = 0;
-            foreach (char c in text)
+            int arWords = 0, latinWords = 0;
+            bool inWord = false, wordAr = false, wordLatin = false;
+            foreach (char c in text + " ")
             {
-                if (c >= '؀' && c <= 'ۿ') ar++;
-                else if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) latin++;
+                bool ar = IsArabicChar(c), la = IsLatinChar(c);
+                if (ar || la || char.IsDigit(c))
+                {
+                    inWord = true; wordAr |= ar; wordLatin |= la;
+                }
+                else if (inWord)
+                {
+                    if (wordAr) arWords++; else if (wordLatin) latinWords++;
+                    inWord = wordAr = wordLatin = false;
+                }
             }
-            return ar > 0 && ar >= latin;
+            return arWords > 0 && arWords >= latinWords;
+        }
+
+        /// Text direction for showing a result: anything translated INTO Arabic is right-to-left,
+        /// even when it contains many English words; otherwise go by the words.
+        public static bool IsRtl(string source, string result)
+        {
+            if (string.IsNullOrEmpty(result) || !HasArabic(result)) return false;
+            if (!string.IsNullOrEmpty(source) && !LooksArabic(source)) return true;
+            return LooksArabic(result);
         }
 
         public Task<string> Translate(string text)

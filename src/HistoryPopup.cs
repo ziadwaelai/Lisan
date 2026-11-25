@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -114,7 +114,7 @@ namespace Lisan
             var i = Selected;
             if (i == null) { detailSource.Text = ""; detailResult.Text = ""; return; }
             detailSource.Text = "Original:  " + OneLine(i.Source);
-            detailResult.RightToLeft = Gemini.LooksArabic(i.Result) ? RightToLeft.Yes : RightToLeft.No;
+            detailResult.RightToLeft = Gemini.IsRtl(i.Source, i.Result) ? RightToLeft.Yes : RightToLeft.No;
             detailResult.Text = i.Result.Replace("\r\n", "\n").Replace("\n", "\r\n");
             // Scrollbar only when the text doesn't fit.
             int textH = TextRenderer.MeasureText(detailResult.Text, detailResult.Font, new Size(W - Pad * 2 - Ui.S(8), int.MaxValue),
@@ -148,7 +148,7 @@ namespace Lisan
             var r2 = new Rectangle(x, e.Bounds.Y + Ui.S(27), w, Ui.S(18));
             var flags = TextFormatFlags.EndEllipsis | TextFormatFlags.SingleLine | TextFormatFlags.NoPrefix;
 
-            var f1 = Gemini.LooksArabic(item.Result) ? flags | TextFormatFlags.Right | TextFormatFlags.RightToLeft : flags;
+            var f1 = Gemini.IsRtl(item.Source, item.Result) ? flags | TextFormatFlags.Right | TextFormatFlags.RightToLeft : flags;
             using (var font = Ui.Font(10.5f)) TextRenderer.DrawText(e.Graphics, OneLine(item.Result), font, r1, Ui.Text, f1);
 
             string meta = Ago(item.Time) + "  ·  " + OneLine(item.Source);
