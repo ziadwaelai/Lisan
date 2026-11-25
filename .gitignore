@@ -1,0 +1,14 @@
+# Build output (the exe is published through GitHub Releases)
+dist/
+*.exe
+*.pdb
+
+# Never commit settings: they contain your API key
+settings.ini
+
+# Editors / OS
+.vs/
+.vscode/
+*.user
+Thumbs.db
+Desktop.ini
