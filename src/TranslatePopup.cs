@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -159,6 +159,7 @@ namespace Lisan
             try { res = await app.Gemini.Translate(text); }
             catch (Exception ex) { err = ex.Message; }
             if (IsDisposed || id != requestId) return;
+            if (err == null && app != null) app.History.AddTranslation(text, res);
             ShowResult(res, err);
         }
 

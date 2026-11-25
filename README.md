@@ -20,10 +20,16 @@ It uses Google's Gemini API **free tier**, is a single ~100 KB `.exe`, and needs
 |---|---|
 | Select text → **Ctrl+Alt+T** | A popup next to your mouse shows the translation. Arabic → English, anything else → Arabic. **Copy** it or **Replace** the selection. |
 | Click in your message → **Ctrl+Alt+R** | Your text is fixed and rewritten in natural English **in place**. Nothing selected? It fixes the whole message box. **Ctrl+Z** undoes it. |
+| **Ctrl+Alt+H** | **History**: your last 20 translations and last 20 fixes, in two tabs. Click one to see it in full; double-click to copy it. |
 | Click the **ع** tray icon | Type or paste any text to translate. |
 | Right-click the tray icon | Pick a rewrite style (**Natural**, **Professional**, **Casual**, **Shorter**), open Settings, or exit. |
 
 <img src="docs/toast.png" alt="'Fixed' confirmation bubble">
+
+<p>
+  <img src="docs/history-fixes.png" width="440" alt="History popup: Fixes tab">
+  <img src="docs/history-translations.png" width="440" alt="History popup: Translations tab">
+</p>
 
 Example (Natural style): `hello mr ali i want to talk wih you is u have times now` → `Hey Mr. Ali, do you have a few minutes to chat now?`
 
@@ -45,13 +51,13 @@ The **ع** icon appears near the clock (click **^** if it's hidden). Select some
 
 Right-click the tray icon → **Settings**.
 
-- **Hotkeys**: click a box and press any combination with Ctrl, Alt or Win.
+- **Hotkeys** (translate, fix, history): click a box and press any combination with Ctrl, Alt or Win.
 - **Translate to Arabic as**: Egyptian (مصري), Modern Standard (فصحى) or Gulf / Saudi (خليجي).
 - **Rewrite style**: Natural, Professional, Casual or Shorter.
 - **Main model**: used for rewriting and for Arabic → English. Default `gemini-3.5-flash-lite`.
 - **Model for Arabic**: used for translating into Arabic. Default `gemini-3.1-flash-lite`.
 
-Settings are stored in `%APPDATA%\Lisan\settings.ini`.
+Settings are stored in `%APPDATA%\Lisan\settings.ini` and history in `%APPDATA%\Lisan\history.json`.
 
 <br clear="right">
 
@@ -66,6 +72,7 @@ Your exact limits are in [AI Studio → Rate limits](https://aistudio.google.com
 - The text you translate or fix is sent to the **Google Gemini API**, and nowhere else. There's no telemetry and no server of ours.
 - On Gemini's **free tier, Google may use your text to improve its products.** Don't use Lisan on passwords, secrets or customer data, or switch your key to a paid tier.
 - Your API key is stored **in plain text** in `%APPDATA%\Lisan\settings.ini`, readable by your Windows user account.
+- Your last 20 translations and 20 fixes are kept **only on your PC** in `%APPDATA%\Lisan\history.json`. Delete them with **Clear history** in the History popup.
 
 ## How it works
 
@@ -98,6 +105,8 @@ src/
   Gemini.cs          prompts, Gemini API calls, model fallback
   TranslatePopup.cs  translation popup
   SettingsForm.cs    settings window + hotkey recorder
+  HistoryPopup.cs    history popup (Translations / Fixes tabs)
+  History.cs         last 20 translations + fixes, saved to history.json
   Toast.cs           small "Fixed" / "Working…" bubble that never steals focus
   Settings.cs        settings file + start-with-Windows
   Native.cs          Win32 calls (hotkeys, key presses)

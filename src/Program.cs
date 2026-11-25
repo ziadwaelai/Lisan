@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Specialized;
 using System.Drawing;
 using System.Net;
@@ -38,12 +38,14 @@ namespace Lisan
 
     internal class TrayApp : ApplicationContext
     {
-        const int TranslateId = 1, RewriteId = 2;
+        const int TranslateId = 1, RewriteId = 2, HistoryId = 3;
 
         public readonly Gemini Gemini;
+        public readonly History History = History.Load();
         readonly NotifyIcon tray;
         readonly HotkeyWindow hotkeys;
         TranslatePopup popup;
+        HistoryPopup historyPopup;
         bool busy;
 
         public TrayApp()
@@ -81,7 +83,7 @@ namespace Lisan
         {
             var s = Program.Settings;
             tray.ShowBalloonTip(8000, "Lisan is ready",
-                "Select text anywhere, then:\n" + s.TranslateHotkey + "  →  translate\n" + s.RewriteHotkey + "  →  fix my writing",
+                "Select text anywhere, then:\n" + s.TranslateHotkey + "  →  translate\n" + s.RewriteHotkey + "  →  fix my writing\n" + s.HistoryHotkey + "  →  history",
                 ToolTipIcon.Info);
         }
 
@@ -98,6 +100,7 @@ namespace Lisan
             {
                 MessageBox.Show("Select the text you wrote (or just click inside the message box), then press " + s.RewriteHotkey + ".", "Lisan");
             }) { ShortcutKeyDisplayString = s.RewriteHotkey });
+            menu.Items.Add(new ToolStripMenuItem("History", null, delegate { ShowHistory(false); }) { ShortcutKeyDisplayString = s.HistoryHotkey });
             menu.Items.Add(new ToolStripSeparator());
 
             var style = new ToolStripMenuItem("Rewrite style");
@@ -139,7 +142,8 @@ namespace Lisan
             var s = Program.Settings;
             string failed = "";
             if (!hotkeys.Register(TranslateId, s.TranslateHotkey)) failed += s.TranslateHotkey + "  ";
-            if (!hotkeys.Register(RewriteId, s.RewriteHotkey)) failed += s.RewriteHotkey;
+            if (!hotkeys.Register(RewriteId, s.RewriteHotkey)) failed += s.RewriteHotkey + "  ";
+            if (!hotkeys.Register(HistoryId, s.HistoryHotkey)) failed += s.HistoryHotkey;
             if (failed != "" && warn)
                 tray.ShowBalloonTip(8000, "Hotkey not available",
                     "Another app is already using " + failed.Trim() + ". Click here to choose a different hotkey.", ToolTipIcon.Warning);
@@ -147,7 +151,9 @@ namespace Lisan
 
         async void OnHotkey(int id)
         {
-            if (busy || settingsOpen) return;
+            if (settingsOpen) return;
+            if (id == HistoryId) { ShowHistory(false); return; }
+            if (busy) return;
             busy = true;
             try
             {
@@ -176,6 +182,14 @@ namespace Lisan
             popup.Show();
         }
 
+        void ShowHistory(bool fixes)
+        {
+            if (historyPopup != null && !historyPopup.IsDisposed) historyPopup.Close();
+            if (popup != null && !popup.IsDisposed) popup.Close();
+            historyPopup = new HistoryPopup(History, fixes);
+            historyPopup.Show();
+        }
+
         // ---------- Fix my writing ----------
         async Task RewriteFlow()
         {
@@ -196,6 +210,8 @@ namespace Lisan
             string result;
             try { result = await Gemini.Rewrite(text); }
             catch (Exception ex) { Toast.Show(ex.Message, Color.FromArgb(242, 139, 130), 6000, false); return; }
+
+            History.AddFix(text, result);
 
             // Keep any spaces/new lines that were around the selection.
             string lead = text.Substring(0, text.Length - text.TrimStart().Length);

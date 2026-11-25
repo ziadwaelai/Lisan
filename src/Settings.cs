@@ -13,6 +13,7 @@ namespace Lisan
         public string ArabicModel = "gemini-3.1-flash-lite"; // cleaner Egyptian Arabic
         public string TranslateHotkey = "Ctrl+Alt+T";
         public string RewriteHotkey = "Ctrl+Alt+R";
+        public string HistoryHotkey = "Ctrl+Alt+H";
         public string ArabicStyle = "Egyptian";   // Egyptian | Standard | Gulf
         public string RewriteStyle = "Natural";   // Natural | Professional | Casual | Shorter
 
@@ -40,6 +41,7 @@ namespace Lisan
                 if (map.TryGetValue("ArabicModel", out v) && v != "") s.ArabicModel = v;
                 if (map.TryGetValue("TranslateHotkey", out v) && v != "") s.TranslateHotkey = v;
                 if (map.TryGetValue("RewriteHotkey", out v) && v != "") s.RewriteHotkey = v;
+                if (map.TryGetValue("HistoryHotkey", out v) && v != "") s.HistoryHotkey = v;
                 if (map.TryGetValue("ArabicStyle", out v) && v != "") s.ArabicStyle = v;
                 if (map.TryGetValue("RewriteStyle", out v) && v != "") s.RewriteStyle = v;
             }
@@ -56,6 +58,7 @@ namespace Lisan
             sb.AppendLine("ArabicModel=" + ArabicModel);
             sb.AppendLine("TranslateHotkey=" + TranslateHotkey);
             sb.AppendLine("RewriteHotkey=" + RewriteHotkey);
+            sb.AppendLine("HistoryHotkey=" + HistoryHotkey);
             sb.AppendLine("ArabicStyle=" + ArabicStyle);
             sb.AppendLine("RewriteStyle=" + RewriteStyle);
             File.WriteAllText(FilePath, sb.ToString(), new UTF8Encoding(false));

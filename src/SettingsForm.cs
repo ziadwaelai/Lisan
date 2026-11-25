@@ -8,7 +8,7 @@ namespace Lisan
     internal class SettingsForm : Form
     {
         readonly TextBox apiKey, model, arabicModel;
-        readonly HotkeyBox translateKey, rewriteKey;
+        readonly HotkeyBox translateKey, rewriteKey, historyKey;
         readonly ComboBox arabicStyle, rewriteStyle;
         readonly CheckBox startup;
 
@@ -59,6 +59,8 @@ namespace Lisan
             AddRow(grid, "Translate hotkey", translateKey);
             rewriteKey = new HotkeyBox { Text = s.RewriteHotkey, Dock = DockStyle.Fill };
             AddRow(grid, "Fix my writing hotkey", rewriteKey);
+            historyKey = new HotkeyBox { Text = s.HistoryHotkey, Dock = DockStyle.Fill };
+            AddRow(grid, "History hotkey", historyKey);
             var hint = new Label { Text = "Click a box and press the keys you want.", AutoSize = true, ForeColor = Ui.Muted, Margin = new Padding(Ui.S(3), 0, 0, Ui.S(10)) };
             AddRow(grid, "", hint);
 
@@ -114,14 +116,14 @@ namespace Lisan
         void SaveAndClose()
         {
             uint m; Keys k;
-            if (!HotkeyBox.TryParse(translateKey.Text, out m, out k) || !HotkeyBox.TryParse(rewriteKey.Text, out m, out k))
+            if (!HotkeyBox.TryParse(translateKey.Text, out m, out k) || !HotkeyBox.TryParse(rewriteKey.Text, out m, out k) || !HotkeyBox.TryParse(historyKey.Text, out m, out k))
             {
                 MessageBox.Show(this, "Each hotkey needs at least one of Ctrl / Alt / Win plus a key.", "Lisan");
                 return;
             }
-            if (translateKey.Text == rewriteKey.Text)
+            if (translateKey.Text == rewriteKey.Text || translateKey.Text == historyKey.Text || rewriteKey.Text == historyKey.Text)
             {
-                MessageBox.Show(this, "The two hotkeys must be different.", "Lisan");
+                MessageBox.Show(this, "Each hotkey must be different.", "Lisan");
                 return;
             }
             var s = Program.Settings;
@@ -130,6 +132,7 @@ namespace Lisan
             s.ArabicModel = arabicModel.Text.Trim() == "" ? "gemini-3.1-flash-lite" : arabicModel.Text.Trim();
             s.TranslateHotkey = translateKey.Text;
             s.RewriteHotkey = rewriteKey.Text;
+            s.HistoryHotkey = historyKey.Text;
             s.ArabicStyle = ArabicValues[arabicStyle.SelectedIndex];
             s.RewriteStyle = RewriteValues[rewriteStyle.SelectedIndex];
             try { s.Save(); Settings.StartWithWindows = startup.Checked; }
